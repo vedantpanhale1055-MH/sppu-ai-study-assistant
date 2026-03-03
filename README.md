@@ -25,10 +25,10 @@ Claude AI           ← Processes syllabus content
 
 ## ⚡ Quick Setup (5 Minutes)
 
-### Step 1 — Get Anthropic API Key
-1. Go to https://console.anthropic.com
+### Step 1 — Get Gemeni API Key
+1. Go to aistudio.google.com
 2. Create an account → API Keys → Create Key
-3. Copy the key (starts with `sk-ant-...`)
+3. Copy the key (starts with `Alza.....)
 
 ### Step 2 — Install Python dependencies
 
