@@ -1,5 +1,4 @@
 import os
-import time
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from google import genai
@@ -58,149 +57,57 @@ Make notes comprehensive enough to score well in SPPU exams."""
     }
     return prompts.get(task_type, prompts["summary"])
 
-
-def process_with_gemini(file_bytes, mime_type, topic, task_type, filename):
-    """
-    Smart upload strategy:
-    - Small files (< 20MB): inline upload (faster)
-    - Large files (>= 20MB): File API upload (supports up to 2GB)
-    """
+def process_with_gemini(file_bytes, mime_type, topic, task_type):
     prompt = build_prompt(topic, task_type)
-    file_size_mb = len(file_bytes) / (1024 * 1024)
-
-    if file_size_mb < 20:
-        # ── Inline upload (fast, no storage needed) ──
-        print(f"Using inline upload ({file_size_mb:.1f} MB)")
-        response = client.models.generate_content(
-            model="models/gemini-1.5-flash",
-            contents=[
-                types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
-                prompt
-            ]
-        )
-    else:
-        # ── File API upload (for large files up to 2GB) ──
-        print(f"Using File API upload ({file_size_mb:.1f} MB)")
-
-        # Save temporarily to disk for upload
-        temp_path = f"temp_{filename}"
-        with open(temp_path, "wb") as f:
-            f.write(file_bytes)
-
-        try:
-            # Upload file to Gemini File API
-            print("Uploading file to Gemini File API...")
-            uploaded_file = client.files.upload(
-                file=temp_path,
-                config=types.UploadFileConfig(
-                    mime_type=mime_type,
-                    display_name=filename
-                )
-            )
-
-            # Wait for file to be processed
-            print("Waiting for file to be ready...")
-            max_wait = 60  # seconds
-            waited = 0
-            while uploaded_file.state.name == "PROCESSING" and waited < max_wait:
-                time.sleep(3)
-                waited += 3
-                uploaded_file = client.files.get(name=uploaded_file.name)
-                print(f"File state: {uploaded_file.state.name}")
-
-            if uploaded_file.state.name == "FAILED":
-                raise Exception("File processing failed on Gemini servers.")
-
-            # Generate content using uploaded file
-            response = client.models.generate_content(
-                model="models/gemini-1.5-flash",
-                contents=[
-                    types.Part.from_uri(
-                        file_uri=uploaded_file.uri,
-                        mime_type=mime_type
-                    ),
-                    prompt
-                ]
-            )
-
-            # Clean up uploaded file from Gemini servers
-            client.files.delete(name=uploaded_file.name)
-            print("File deleted from Gemini servers.")
-
-        finally:
-            # Always clean up temp file
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[
+            types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
+            prompt
+        ]
+    )
     return response.text
-
 
 @app.route('/api/process', methods=['POST'])
 def process_syllabus():
     try:
         if 'file' not in request.files:
             return jsonify({"error": "No file uploaded"}), 400
-
         file = request.files['file']
         topic = request.form.get('topic', '').strip()
         task_type = request.form.get('task_type', 'summary')
-
         if file.filename == '':
             return jsonify({"error": "No file selected"}), 400
-
         file_bytes = file.read()
-        filename = file.filename
-        filename_lower = filename.lower()
-
-        # Determine correct MIME type
-        if filename_lower.endswith('.pdf'):
+        filename = file.filename.lower()
+        if filename.endswith('.pdf'):
             mime_type = 'application/pdf'
-        elif filename_lower.endswith('.png'):
+        elif filename.endswith('.png'):
             mime_type = 'image/png'
-        elif filename_lower.endswith('.webp'):
+        elif filename.endswith('.webp'):
             mime_type = 'image/webp'
-        elif filename_lower.endswith('.gif'):
+        elif filename.endswith('.gif'):
             mime_type = 'image/gif'
         else:
             mime_type = 'image/jpeg'
-
-        # Max 2GB limit
-        if len(file_bytes) > 2 * 1024 * 1024 * 1024:
-            return jsonify({"error": "File too large. Maximum size is 2GB."}), 400
-
-        file_size_mb = len(file_bytes) / (1024 * 1024)
-        print(f"Processing: {filename} ({file_size_mb:.1f} MB) | Task: {task_type}")
-
-        result_text = process_with_gemini(file_bytes, mime_type, topic, task_type, filename)
-
-        return jsonify({
-            "success": True,
-            "result": result_text,
-            "task_type": task_type,
-            "topic": topic,
-            "file_size_mb": round(file_size_mb, 1),
-            "extraction_method": "gemini-file-api" if file_size_mb >= 20 else "gemini-inline"
-        })
-
+        if len(file_bytes) > 20 * 1024 * 1024:
+            return jsonify({"error": "File too large. Please use a file under 20MB."}), 400
+        result_text = process_with_gemini(file_bytes, mime_type, topic, task_type)
+        return jsonify({"success": True, "result": result_text, "task_type": task_type, "topic": topic, "extraction_method": "gemini-vision"})
     except Exception as e:
         print(f"Error: {e}")
         error_msg = str(e)
         if "API_KEY" in error_msg or "api key" in error_msg.lower():
             error_msg = "Invalid or missing Gemini API key. Please check your GEMINI_API_KEY."
-        elif "quota" in error_msg.lower() or "429" in error_msg:
+        elif "quota" in error_msg.lower():
             error_msg = "Free quota exceeded. Please wait a minute and try again."
-        elif "too large" in error_msg.lower():
-            error_msg = "File too large. Please use a file under 2GB."
         return jsonify({"error": error_msg}), 500
-
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "ok", "message": "SPPU AI Study Assistant (Gemini) is running!"})
 
-
 if __name__ == '__main__':
     print("🎓 SPPU AI Study Assistant (Google Gemini) Starting...")
     print("📡 Running on http://localhost:5000")
-    print("📁 Supports files up to 2GB via Gemini File API")
     app.run(debug=True, port=5000)
