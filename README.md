@@ -16,61 +16,59 @@ index.html          ← Frontend (just open in browser)
     ▼
 app.py (Flask)      ← Python backend on port 5000
     │
-    │  Anthropic Claude API (Vision + Text)
+    │  Google Gemini API (Free)
     ▼
-Claude AI           ← Processes syllabus content
+Gemini 2.0 Flash    ← Processes syllabus content
 ```
 
 ---
 
 ## ⚡ Quick Setup (5 Minutes)
 
-### Step 1 — Get Gemeni API Key
-1. Go to aistudio.google.com
-2. Create an account → API Keys → Create Key
-3. Copy the key (starts with `Alza.....)
+### Step 1 — Get FREE Gemini API Key
+1. Go to https://aistudio.google.com
+2. Sign in with your Google account
+3. Click **Get API Key** → **Create API Key**
+4. Copy the key (starts with `AIza...`)
+5. No credit card needed — completely free!
 
 ### Step 2 — Install Python dependencies
 
 ```bash
-# Make sure Python 3.9+ is installed
-pip install -r requirements.txt
-
-# Also install tesseract for OCR (fallback for images)
-# Ubuntu/Debian:
-sudo apt-get install tesseract-ocr
-
-# macOS:
-brew install tesseract
-
-# Windows:
-# Download from: https://github.com/UB-Mannheim/tesseract/wiki
+pip install flask flask-cors google-genai
 ```
 
 ### Step 3 — Set API Key & Run Backend
 
 ```bash
-# Linux/macOS
-export ANTHROPIC_API_KEY="sk-ant-your-key-here"
-python app.py
-
 # Windows (Command Prompt)
-set ANTHROPIC_API_KEY=sk-ant-your-key-here
-python app.py
-
-# Windows (PowerShell)
-$env:ANTHROPIC_API_KEY="sk-ant-your-key-here"
+cd F:\APP
+set GEMINI_API_KEY=AIza-your-key-here
 python app.py
 ```
 
 You should see:
 ```
-🎓 SPPU AI Study Assistant Backend Starting...
+🎓 SPPU AI Study Assistant (Google Gemini) Starting...
 📡 Running on http://localhost:5000
 ```
 
 ### Step 4 — Open Frontend
-Simply open `index.html` in your browser (double-click or drag into Chrome/Firefox).
+Simply open `index.html` in your browser (double-click it). That's it! 🎉
+
+---
+
+## 🚀 Easy Start (Every Time)
+
+Create a file called `start.bat` in your APP folder with this content:
+
+```batch
+cd F:\APP
+set GEMINI_API_KEY=AIza-your-key-here
+python app.py
+```
+
+Just **double-click `start.bat`** every time you want to run the app!
 
 ---
 
@@ -87,27 +85,25 @@ Simply open `index.html` in your browser (double-click or drag into Chrome/Firef
 ## 📁 File Structure
 
 ```
-sppu-ai-assistant/
-├── index.html          ← Frontend (open in browser)
-├── app.py              ← Python Flask backend
-├── requirements.txt    ← Python dependencies
-└── README.md           ← This file
+APP/
+├── index.html       ← Frontend (open in browser)
+├── app.py           ← Python Flask backend
+├── requirements.txt ← Python dependencies
+├── start.bat        ← Double-click to start (Windows)
+└── README.md        ← This file
 ```
 
 ---
 
-## 🧠 How the AI Logic Works
+## 🆓 Free Tier Limits (Gemini)
 
-The app uses a **chain-style prompt engineering** approach (inspired by LangChain):
+| Limit | Value |
+|---|---|
+| Requests per minute | 15 |
+| Requests per day | 1500 |
+| Cost | FREE |
 
-1. **Extract** — Claude Vision reads the PDF/image directly
-2. **Identify** — Determines what topic and content is relevant
-3. **Generate** — Uses a specific prompt template per task type:
-   - `summary` prompt → structured overview
-   - `questions` prompt → SPPU exam-pattern questions
-   - `notes` prompt → detailed study notes
-
-No LangChain dependency needed — the same pattern implemented directly with the Anthropic SDK for simplicity and reliability.
+If you see "quota exceeded", just wait 1 minute and try again.
 
 ---
 
@@ -116,18 +112,9 @@ No LangChain dependency needed — the same pattern implemented directly with th
 | Problem | Fix |
 |---|---|
 | `Cannot connect to backend` | Make sure `python app.py` is running |
-| `API Key error` | Check `ANTHROPIC_API_KEY` is set correctly |
-| `File not readable` | Use clearer image, or use PDF instead |
-| CORS error in browser | Backend CORS is enabled, try refreshing |
-| Tesseract not found | Install tesseract (see Step 2) — optional, app works without it |
-
----
-
-## 💰 Cost Estimate
-
-- ~1000-3000 tokens per request
-- Claude API: ~$0.003-0.015 per request (very cheap)
-- Free tier available on Anthropic console
+| `Free quota exceeded` | Wait 1 minute and try again |
+| `Invalid API key` | Check GEMINI_API_KEY is set correctly |
+| File not processing | Use PDF or clear image under 20MB |
 
 ---
 
