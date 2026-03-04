@@ -72,7 +72,7 @@ def process_with_gemini(file_bytes, mime_type, topic, task_type, filename):
         # ── Inline upload (fast, no storage needed) ──
         print(f"Using inline upload ({file_size_mb:.1f} MB)")
         response = client.models.generate_content(
-            model="gemini-1.5-flash-latest",
+            model="gemini-1.5-flash-001",
             contents=[
                 types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
                 prompt
@@ -113,7 +113,7 @@ def process_with_gemini(file_bytes, mime_type, topic, task_type, filename):
 
             # Generate content using uploaded file
             response = client.models.generate_content(
-                model="gemini-1.5-flash-latest",
+                model="gemini-1.5-flash-001",
                 contents=[
                     types.Part.from_uri(
                         file_uri=uploaded_file.uri,
