@@ -7,77 +7,108 @@ An AI-powered web app for SPPU students to upload their syllabus (PDF/Image) and
 
 ---
 
+## 🌍 Live Demo
+- **Frontend:** https://vedantpanhale1055-mh.github.io/sppu-ai-study-assistant
+- **Backend:** https://sppu-ai-study-assistant.onrender.com
+
+---
+
 ## 🏗️ Architecture
 
 ```
-index.html          ← Frontend (just open in browser)
+index.html          ← Frontend (GitHub Pages)
     │
     │  HTTP POST /api/process (FormData)
     ▼
-app.py (Flask)      ← Python backend on port 5000
+app.py (Flask)      ← Python backend (Render.com)
     │
-    │  Google Gemini API (Free)
+    │  Groq API (Free - LLaMA 3.3 70B)
     ▼
-Gemini 2.0 Flash    ← Processes syllabus content
+Groq LLaMA AI       ← Processes syllabus content
 ```
 
 ---
 
-## ⚡ Quick Setup (5 Minutes)
+## ⚡ Local Setup (Run on Your PC)
 
-### Step 1 — Get FREE Gemini API Key
-1. Go to https://aistudio.google.com
-2. Sign in with your Google account
-3. Click **Get API Key** → **Create API Key**
-4. Copy the key (starts with `AIza...`)
+### Step 1 — Get FREE Groq API Key
+1. Go to https://console.groq.com
+2. Sign up with Google account
+3. Click **API Keys** → **Create API Key**
+4. Copy the key (starts with `gsk_...`)
 5. No credit card needed — completely free!
 
 ### Step 2 — Install Python dependencies
 
 ```bash
-pip install flask flask-cors google-genai
+pip install flask flask-cors groq PyPDF2 gunicorn
 ```
 
-### Step 3 — Set API Key & Run Backend
+### Step 3 — Run Backend
 
 ```bash
-# Windows (Command Prompt)
+# Windows CMD
 cd F:\APP
-set GEMINI_API_KEY=AIza-your-key-here
+set GROQ_API_KEY=gsk_your-key-here
+python app.py
+
+# Windows PowerShell / VS Code Terminal
+cd F:\APP
+$env:GROQ_API_KEY="gsk_your-key-here"
 python app.py
 ```
 
 You should see:
 ```
-🎓 SPPU AI Study Assistant (Google Gemini) Starting...
+🎓 SPPU AI Study Assistant (Groq LLaMA) Starting...
 📡 Running on http://localhost:5000
 ```
 
 ### Step 4 — Open Frontend
-Simply open `index.html` in your browser (double-click it). That's it! 🎉
+Simply open `index.html` in your browser. That's it! 🎉
 
 ---
 
-## 🚀 Easy Start (Every Time)
+## 🚀 Easy Start Every Time (Windows)
 
-Create a file called `start.bat` in your APP folder with this content:
+Create `start.bat` in your APP folder:
 
 ```batch
 cd F:\APP
-set GEMINI_API_KEY=AIza-your-key-here
+set GROQ_API_KEY=gsk_your-key-here
 python app.py
 ```
 
-Just **double-click `start.bat`** every time you want to run the app!
+Just **double-click `start.bat`** to start the server!
+
+---
+
+## ☁️ Deployment
+
+### Backend — Render.com (Free)
+1. Go to **render.com** → Sign up with GitHub
+2. Click **New +** → **Web Service**
+3. Connect your GitHub repo
+4. Add environment variable:
+   - Key: `GROQ_API_KEY`
+   - Value: `gsk_your-key-here`
+5. Click **Deploy**
+6. Your backend URL: `https://sppu-ai-study-assistant.onrender.com`
+
+### Frontend — GitHub Pages (Free)
+1. Go to your GitHub repo → **Settings** → **Pages**
+2. Source: **Deploy from branch** → **main** → **/ (root)**
+3. Click **Save**
+4. Your frontend URL: `https://vedantpanhale1055-mh.github.io/sppu-ai-study-assistant`
 
 ---
 
 ## 🎮 How to Use
 
 1. **Upload** your SPPU syllabus PDF or photo
-2. **Type a topic** (optional) — e.g., "Operating Systems", "TCP/IP", "B-Trees"
+2. **Type a topic** (optional) — e.g., "Operating Systems", "TCP/IP", "IoT"
 3. **Select what you need**: Summary / Important Questions / Detailed Notes
-4. Click **Generate with AI** and wait 15-30 seconds
+4. Click **Generate with AI** and wait 10-20 seconds
 5. **Copy or Download** the output as Markdown
 
 ---
@@ -86,24 +117,23 @@ Just **double-click `start.bat`** every time you want to run the app!
 
 ```
 APP/
-├── index.html       ← Frontend (open in browser)
-├── app.py           ← Python Flask backend
+├── index.html       ← Frontend (open in browser / GitHub Pages)
+├── app.py           ← Python Flask backend (Groq AI)
 ├── requirements.txt ← Python dependencies
-├── start.bat        ← Double-click to start (Windows)
+├── render.yaml      ← Render.com deployment config
+├── start.bat        ← Double-click to start locally (Windows)
 └── README.md        ← This file
 ```
 
 ---
 
-## 🆓 Free Tier Limits (Gemini)
+## 🆓 Groq Free Tier Limits
 
 | Limit | Value |
 |---|---|
-| Requests per minute | 15 |
-| Requests per day | 1500 |
+| Requests per minute | 30 |
+| Requests per day | 14,400 |
 | Cost | FREE |
-
-If you see "quota exceeded", just wait 1 minute and try again.
 
 ---
 
@@ -112,10 +142,26 @@ If you see "quota exceeded", just wait 1 minute and try again.
 | Problem | Fix |
 |---|---|
 | `Cannot connect to backend` | Make sure `python app.py` is running |
-| `Free quota exceeded` | Wait 1 minute and try again |
-| `Invalid API key` | Check GEMINI_API_KEY is set correctly |
+| `Rate limit exceeded` | Wait 1 minute and try again |
+| `Invalid API key` | Check GROQ_API_KEY is set correctly |
+| PowerShell key not working | Use `$env:GROQ_API_KEY="gsk_..."` instead of `set` |
 | File not processing | Use PDF or clear image under 20MB |
+| Git push rejected | Run `git pull origin main --no-rebase` then `git push` |
+
+---
+
+## 🔧 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | HTML, CSS, JavaScript |
+| Backend | Python, Flask |
+| AI Model | Groq LLaMA 3.3 70B |
+| PDF Processing | PyPDF2 |
+| Hosting (Backend) | Render.com (Free) |
+| Hosting (Frontend) | GitHub Pages (Free) |
 
 ---
 
 *Made for SPPU Students in Pune 🙏*
+*GitHub: https://github.com/vedantpanhale1055-MH/sppu-ai-study-assistant*
