@@ -738,7 +738,7 @@
     <div class="upload-zone" id="uploadZone">
       <span class="upload-icon"><i class="fas fa-file-arrow-up"></i></span>
       <p class="upload-title">Drop your syllabus here</p>
-      <p class="upload-sub">Supports PDF, JPG, PNG, WEBP • Max 10MB</p>
+      <p class="upload-sub">Supports PDF, JPG, PNG, WEBP • Max 100MB</p>
       <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
         <i class="fas fa-folder-open"></i> Browse File
       </button>
@@ -861,8 +861,8 @@
       showToast('❌ Only PDF and image files are supported', 'error');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      showToast('❌ File must be under 10MB', 'error');
+    if (file.size > 100 * 1024 * 1024) {
+      showToast('❌ File must be under 100MB', 'error');
       return;
     }
     selectedFile = file;
